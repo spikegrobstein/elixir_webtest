@@ -1,0 +1,12 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Hello</title>
+<body>
+  <h1>Welcome users!</h1>
+  <ul>
+    <%= lc user inlist @users do %>
+    <li><%= user %></li>
+    <% end %>
+  </ul>
+</body>
