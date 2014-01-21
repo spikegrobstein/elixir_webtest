@@ -58,8 +58,10 @@ defmodule ApplicationRouter do
       { :ok, _ } ->
         event_handler( conn )
       { :error, :closed } ->
+        # my event stream connection closed
+        # so delete self from the subscriberstore and terminate
         :gen_server.cast( :subscriber_store, { :del, self } )
-        event_handler( conn )
+        conn
       _ ->
         event_handler( conn )
     end
