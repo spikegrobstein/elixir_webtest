@@ -67,11 +67,11 @@ defmodule ApplicationRouter do
   end
 
   defp handle_event( { :add, user }, conn ) do
-    conn.chunk "data: {\"action\":\"add\",\"user\":\"#{ user }\"}\n\n"
+    send_chunk conn, [ action: "add", user: user ]
   end
 
   defp handle_event( { :del, user }, conn ) do
-    conn.chunk "data: {\"action\":\"del\",\"user\":\"#{ user }\"}\n\n"
+    send_chunk conn, [ action: "del", user: user ]
   end
 
   defp handle_event( msg, _conn ) do
@@ -80,6 +80,17 @@ defmodule ApplicationRouter do
 
   defp on_time_out( _a ) do
     { :timeout }
+  end
+
+  defp send_chunk( conn, data ) do
+    result = JSON.encode(data)
+
+    case result do
+      { :ok, json } ->
+        conn.chunk "data: #{ json }\n\n"
+      _ ->
+        conn
+    end
   end
 
 end
