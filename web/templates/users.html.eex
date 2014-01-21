@@ -12,17 +12,18 @@
 
   <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
   <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-  <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
 
   <script>
   (function(global, document) {
     var e = new EventSource('/user-stream');
 
+    // listen for the event stream from the server
     e.addEventListener( 'message', function(event) {
       var data = JSON.parse( event.data );
       handle_event( data.action, data.user );
     } );
 
+    // receive a parsed event and route it to the right function
     function handle_event( action, user ) {
       console.log( "action: " + action + ', user: ' + user );
 
@@ -33,12 +34,15 @@
       }
     }
 
+    // add an <li> element to ul#users
+    // it should have a data-user attribute of the user's name
     function add_user( user_name ) {
       $('#users').append(
         $('<li>' + user_name + '</li>').data('user', user_name)
       )
     }
 
+    // remove an <li> element from ul#users that has a matching data-user attribute
     function del_user( user_name ) {
       $('#users li').each( function( i, user ) {
         if ( $(user).data('user') == user_name ) {
