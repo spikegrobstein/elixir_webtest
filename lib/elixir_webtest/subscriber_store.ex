@@ -6,7 +6,6 @@ defmodule ElixirWebtest.SubscriberStore do
   end
 
   def init( subscribers ) do
-    IO.puts "starting subscriberstore #{ inspect subscribers }"
     { :ok, subscribers }
   end
 

@@ -31,9 +31,7 @@ defmodule ApplicationRouter do
     # add that handler to the subscribers
     :gen_server.cast( :subscriber_store, { :add, self } )
 
-    conn.chunk('test: testing')
-
-    event_sender( conn )
+    event_handler conn
   end
 
   get "/api/login/:name" do
@@ -49,16 +47,35 @@ defmodule ApplicationRouter do
     redirect conn, to: "/users"
   end
 
-  defp event_sender( conn ) do
-    receive do
-      { :add, user } ->
-        IO.puts "GOT ADD USER: #{ user }"
-        { :ok, conn } = conn.chunk "add: #{ user }"
-       data ->
-        IO.puts "ERROR in event_sender #{ inspect data }"
+  defp event_handler( conn ) do
+    result = await( conn, 5000, &handle_event(&1, &2), &on_time_out(&1) )
+
+    case result do
+      { :timeout } ->
+        # disconnect the client!
+        conn
+      { :ok, _ } ->
+        event_handler( conn )
+      _ ->
+        event_handler( conn )
     end
 
-    event_sender( conn )
+  end
+
+  defp handle_event( { :add, user }, conn ) do
+    { :ok, _conn } = conn.chunk "data: #{ user }\n\n"
+  end
+
+  defp handle_event( { :del, user }, _conn ) do
+    IO.puts "should delete the user: #{ user }"
+  end
+
+  defp handle_event( msg, _conn ) do
+    msg
+  end
+
+  defp on_time_out( _a ) do
+    { :timeout }
   end
 
 end
