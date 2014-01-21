@@ -48,14 +48,16 @@ defmodule ApplicationRouter do
   end
 
   defp event_handler( conn ) do
+    # wait for up to 5 seconds for a message
     result = await( conn, 5000, &handle_event(&1, &2), &on_time_out(&1) )
 
     case result do
       { :timeout } ->
-        # disconnect the client!
-        # conn
+        # this is returned from the on_time_out/1 function below
+        # ignore timeouts for now and keep recursing.
         event_handler( conn )
       { :ok, _ } ->
+        # normal operation
         event_handler( conn )
       { :error, :closed } ->
         # my event stream connection closed
@@ -63,6 +65,7 @@ defmodule ApplicationRouter do
         :gen_server.cast( :subscriber_store, { :del, self } )
         conn
       _ ->
+        # anything else, just ignore it and recurse
         event_handler( conn )
     end
 
