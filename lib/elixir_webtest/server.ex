@@ -14,11 +14,29 @@ defmodule ElixirWebtest.Server do
   end
 
   def handle_cast( { :add_user, new_user }, users ) do
-    IO.puts "broadcasting add..."
+    { :noreply, add_user( users, new_user ) }
+  end
 
-    :gen_server.cast( :subscriber_store, { :broadcast, { :add, new_user } } )
+  def handle_cast( { :del_user, user }, users ) do
+    { :noreply, del_user( users, user ) }
+  end
 
-    { :noreply, [ new_user | users ] }
+  defp add_user( users, new_user ) do
+    if Enum.any?( users, fn(x) -> x == new_user end ) do
+      users
+    else
+      :gen_server.cast :subscriber_store, { :broadcast, { :add, new_user } }
+      [new_user|users]
+    end
+  end
+
+  defp del_user( users, user ) do
+    if Enum.any?( users, fn(x) -> x == user end ) do
+      :gen_server.cast :subscriber_store, { :broadcast, { :del, user } }
+      List.delete( users, user )
+    else
+      users
+    end
   end
 
 end

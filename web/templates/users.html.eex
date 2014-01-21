@@ -4,9 +4,49 @@
   <title>Hello</title>
 <body>
   <h1>Welcome users!</h1>
-  <ul>
+  <ul id="users">
     <%= lc user inlist @users do %>
-    <li><%= user %></li>
+    <li data-user="<%= user %>"><%= user %></li>
     <% end %>
   </ul>
+
+  <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+  <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+  <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
+
+  <script>
+  (function(global, document) {
+    var e = new EventSource('/user-stream');
+
+    e.addEventListener( 'message', function(event) {
+      var data = JSON.parse( event.data );
+      handle_event( data.action, data.user );
+    } );
+
+    function handle_event( action, user ) {
+      console.log( "action: " + action + ', user: ' + user );
+
+      if ( action === 'add' ) {
+        add_user( user );
+      } else if ( action === 'del' ) {
+        del_user( user );
+      }
+    }
+
+    function add_user( user_name ) {
+      $('#users').append(
+        $('<li>' + user_name + '</li>').data('user', user_name)
+      )
+    }
+
+    function del_user( user_name ) {
+      $('#users li').each( function( i, user ) {
+        if ( $(user).data('user') == user_name ) {
+          user.remove();
+        }
+      });
+    }
+
+  })(window, document);
+  </script>
 </body>

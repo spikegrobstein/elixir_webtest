@@ -42,7 +42,7 @@ defmodule ApplicationRouter do
   end
 
   get "/api/logout/:name" do
-    Redis.srem("users", conn.params[:name])
+    :gen_server.cast( :userstore, { :del_user, conn.params[:name] } )
 
     redirect conn, to: "/users"
   end
@@ -53,8 +53,12 @@ defmodule ApplicationRouter do
     case result do
       { :timeout } ->
         # disconnect the client!
-        conn
+        # conn
+        event_handler( conn )
       { :ok, _ } ->
+        event_handler( conn )
+      { :error, :closed } ->
+        :gen_server.cast( :subscriber_store, { :del, self } )
         event_handler( conn )
       _ ->
         event_handler( conn )
@@ -63,11 +67,11 @@ defmodule ApplicationRouter do
   end
 
   defp handle_event( { :add, user }, conn ) do
-    { :ok, _conn } = conn.chunk "data: #{ user }\n\n"
+    conn.chunk "data: {\"action\":\"add\",\"user\":\"#{ user }\"}\n\n"
   end
 
-  defp handle_event( { :del, user }, _conn ) do
-    IO.puts "should delete the user: #{ user }"
+  defp handle_event( { :del, user }, conn ) do
+    conn.chunk "data: {\"action\":\"del\",\"user\":\"#{ user }\"}\n\n"
   end
 
   defp handle_event( msg, _conn ) do

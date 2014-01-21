@@ -9,9 +9,15 @@ defmodule ElixirWebtest.SubscriberStore do
     { :ok, subscribers }
   end
 
+  # add a subscriber
   def handle_cast( { :add, new_subscriber }, subscribers ) do
     IO.puts "adding newsubscriber: #{ inspect new_subscriber }"
-    { :noreply, [ new_subscriber | subscribers ] }
+    { :noreply, add_subscriber(subscribers, new_subscriber) }
+  end
+
+  # remove a subscriber
+  def handle_cast( { :del, subscriber }, subscribers ) do
+    { :noreply, remove_subscriber( subscribers, subscriber ) }
   end
 
   def handle_cast( { :broadcast, event }, subscribers ) do
@@ -23,4 +29,18 @@ defmodule ElixirWebtest.SubscriberStore do
 
     { :noreply, subscribers }
   end
+
+  defp remove_subscriber( subscribers, subscriber ) do
+    IO.puts "removing subscriber"
+    List.delete subscribers, subscriber
+  end
+
+  defp add_subscriber( subscribers, new_subscriber ) do
+    if Enum.any?( subscribers, fn(x) -> x == new_subscriber end ) do
+      subscribers
+    else
+      [new_subscriber|subscribers]
+    end
+  end
+
 end
