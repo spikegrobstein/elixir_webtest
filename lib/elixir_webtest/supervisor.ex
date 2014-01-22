@@ -1,14 +1,14 @@
 defmodule ElixirWebtest.Supervisor do
   use Supervisor.Behaviour
 
-  def start_link(stack) do
-    :supervisor.start_link(__MODULE__, stack)
+  def start_link( user_list ) do
+    :supervisor.start_link(__MODULE__, user_list )
   end
 
-  def init(stack) do
+  def init( user_list ) do
     children = [
       worker(ElixirWebtest.SubscriberStore, [[]]),
-      worker(ElixirWebtest.UserStore, [stack]),
+      worker(ElixirWebtest.UserStore, [ user_list ]),
       supervisor(ElixirWebtest.Dynamo, [])
     ]
 
