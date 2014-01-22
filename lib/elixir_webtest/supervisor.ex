@@ -8,7 +8,7 @@ defmodule ElixirWebtest.Supervisor do
   def init(stack) do
     children = [
       worker(ElixirWebtest.SubscriberStore, [[]]),
-      worker(ElixirWebtest.Server, [stack]),
+      worker(ElixirWebtest.UserStore, [stack]),
       supervisor(ElixirWebtest.Dynamo, [])
     ]
 

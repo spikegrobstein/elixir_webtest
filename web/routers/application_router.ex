@@ -17,7 +17,7 @@ defmodule ApplicationRouter do
   end
 
   get "/users" do
-    users = :gen_server.call( :userstore, :list_users )
+    users = :gen_server.call( :user_store, :list_users )
 
     conn = conn.assign(:users, users)
 
@@ -35,14 +35,13 @@ defmodule ApplicationRouter do
   end
 
   get "/api/login/:name" do
-    # Redis.sadd("users", conn.params[:name])
-    :gen_server.cast( :userstore, { :add_user, conn.params[:name] } )
+    :gen_server.cast( :user_store, { :add_user, conn.params[:name] } )
 
     redirect conn, to: "/users"
   end
 
   get "/api/logout/:name" do
-    :gen_server.cast( :userstore, { :del_user, conn.params[:name] } )
+    :gen_server.cast( :user_store, { :del_user, conn.params[:name] } )
 
     redirect conn, to: "/users"
   end

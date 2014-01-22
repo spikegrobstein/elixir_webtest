@@ -1,8 +1,8 @@
-defmodule ElixirWebtest.Server do
+defmodule ElixirWebtest.UserStore do
   use GenServer.Behaviour
 
   def start_link(users) do
-    :gen_server.start_link({:local, :userstore}, __MODULE__, users, [])
+    :gen_server.start_link({:local, :user_store}, __MODULE__, users, [])
   end
 
   def init(users) do
